@@ -1,113 +1,6 @@
-// import axios from 'axios';
-// import { useEffect, useState } from 'react';
-// import TaskCard from './TaskCard'; // Import the TaskCard component
-// import styled from 'styled-components';
-// import { useNavigate } from 'react-router-dom';
-
-// // Styled container for the task cards
-// const TaskContainer = styled.div`
-//   display: flex;
-//   flex-wrap: wrap;
-//   justify-content: center;
-//   gap: 20px;
-// `;
-
-// const Home = () => {
-//   const [AllTask, setAllTasks] = useState([]);
-//   const [refresh , setRefresh] = useState(false);
-
-
-//   const [sortedInc,setsortedInc] = useState(false);
-
-//   const navigate = useNavigate()
-
-//   const fetchData = async () => {
-//     try {
-//       const user = localStorage.getItem('user');
-
-//       if (!user) {
-//         throw new Error('User not found in localStorage');
-//       }
-
-//       const userObject = JSON.parse(user);
-//       const email = userObject.email;
-
-//       if (!email) {
-//         throw new Error('Email not found in user object');
-//       }
-
-//       const payload = {
-//         userEmail: email,
-//       };
-
-//       const response = await axios.post('http://localhost:4000/getAllTasks', payload);
-
-//       console.log(response?.data);
-
-//       setAllTasks(response?.data?.Tasks || []);
-//     } catch (error) {
-//       console.error('Error fetching data:', error);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchData();
-//   }, [refresh]);
-
-//   const handleAdd = ()=>{
-//     navigate('/addTask')
-//   }
-
-//   const handleSort = () => {
-//     const sortedTasks = [...AllTask].sort((a:any, b:any) => {
-//       const priorityA = parseInt(a.priority);
-//       const priorityB = parseInt(b.priority);
-//       if (sortedInc) {
-//         return priorityA - priorityB; 
-//       } else {
-//         return priorityB - priorityA; 
-//       }
-//     });
-
-//     setAllTasks(sortedTasks);
-//     setsortedInc(!sortedInc); // Toggle the sorting direction
-//   };
-
-
-//   const changeRefresh = ()=>{
-//     setRefresh(!refresh)
-//   }
-
-//   return (
-//     <div>
-//       <h2>Task Manager  </h2>
-
-//       <button onClick={handleAdd}> Add Task</button>
-
-//       <button onClick={handleSort}>Sort by Priority {sortedInc ? '▲' : '▼'}</button>
-//       <TaskContainer>
-//         {AllTask.map((task:any) => (
-//           <TaskCard
-//             key={task._id}
-//             title={task.title}
-//             description={task.description}
-//             deadline={task.deadline}
-//             priority={task.priority}
-//             taskid = {task.taskid}
-//             changeRefresh={changeRefresh}
-//           />
-//         ))}
-//       </TaskContainer>
-//     </div>
-//   );
-// };
-
-// export default Home;
-
-
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
-import TaskCard from './TaskCard'; // Import the TaskCard component
+import TaskCard from './TaskCard';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 
@@ -153,6 +46,12 @@ const HomeContainer = styled.div`
   min-height: 100vh;
 `;
 
+const LogoutButton = styled(Button)`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+`;
+
 interface Task {
   _id: string;
   title: string;
@@ -167,6 +66,7 @@ const Home: React.FC = () => {
   const [refresh, setRefresh] = useState(false);
   const [sortedInc, setsortedInc] = useState(false);
   const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem('user'); // Check if user is logged in
 
   const fetchData = async () => {
     try {
@@ -187,9 +87,7 @@ const Home: React.FC = () => {
         userEmail: email,
       };
 
-      const response = await axios.post('http://localhost:4000/getAllTasks', payload);
-
-      console.log(response?.data);
+      const response = await axios.post('https://satish-task-manager.onrender.com/getAllTasks', payload);
 
       setAllTasks(response?.data?.Tasks || []);
     } catch (error) {
@@ -224,9 +122,15 @@ const Home: React.FC = () => {
     setRefresh(!refresh);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   return (
     <HomeContainer>
       <Header>Task Manager</Header>
+      {isLoggedIn ? <LogoutButton onClick={handleLogout}>Logout</LogoutButton> : <Button onClick={() => navigate('/login')}>Login</Button>}
       <div>
         <Button primary onClick={handleAdd}>Add Task</Button>
         <Button onClick={handleSort}>Sort by Priority {sortedInc ? '▲' : '▼'}</Button>
@@ -249,5 +153,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-
-

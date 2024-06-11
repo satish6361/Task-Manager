@@ -9,7 +9,7 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background-color: #f0f8ff;
+  background-color: #f0f8ff; /* Light blue */
   min-height: 100vh;
 `;
 
@@ -22,7 +22,7 @@ const FormWrapper = styled.form`
   max-width: 400px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start; /* Align labels to the left */
 `;
 
 const Title = styled.h2`
@@ -33,7 +33,7 @@ const Title = styled.h2`
 `;
 
 const Input = styled.input`
-  width: 100%;
+  width: calc(100% - 24px); /* Subtract padding */
   padding: 12px;
   margin-bottom: 15px;
   border: 1px solid #ddd;
@@ -48,9 +48,9 @@ const Input = styled.input`
 `;
 
 const Button = styled.button`
-  width: 100%;
+  width: calc(100%); /* Subtract padding */
   padding: 12px;
-  background: #007bff;
+  background: linear-gradient(145deg, #00acc1, #00838f); /* Bluish tone gradient */
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -59,7 +59,7 @@ const Button = styled.button`
   transition: background 0.3s ease, transform 0.3s ease;
 
   &:hover {
-    background: #0056b3;
+    background: linear-gradient(145deg, #0097a7, #006064); /* Darker shade on hover */
     transform: translateY(-2px);
   }
 `;
@@ -70,6 +70,21 @@ const SuccessMessage = styled.div`
   background-color: #d4edda;
   color: #155724;
   border-radius: 5px;
+`;
+
+const AlertMessage = styled.div`
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #f8d7da;
+  color: #721c24;
+  border-radius: 5px;
+`;
+
+const Label = styled.label`
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  align-self: flex-start; /* Align labels to the left */
 `;
 
 const AddTask: React.FC = () => {
@@ -83,6 +98,7 @@ const AddTask: React.FC = () => {
   });
 
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -97,7 +113,8 @@ const AddTask: React.FC = () => {
       const user = localStorage.getItem('user');
 
       if (!user) {
-        throw new Error('User not found in localStorage');
+        setErrorMessage('Please login to add a task');
+        return;
       }
 
       const userObject = JSON.parse(user);
@@ -112,7 +129,7 @@ const AddTask: React.FC = () => {
         userEmail: email,
       };
 
-      const response = await axios.post('http://localhost:4000/addTask', payload);
+      const response = await axios.post('https://satish-task-manager.onrender.com/addTask', payload);
 
       if (response.status === 201) {
         setSuccessMessage('Task Added Successfully');
@@ -129,6 +146,7 @@ const AddTask: React.FC = () => {
     <Container>
       <FormWrapper onSubmit={handleSubmit}>
         <Title>Add Task</Title>
+        <Label htmlFor="title">Title</Label>
         <Input
           type="text"
           name="title"
@@ -137,6 +155,7 @@ const AddTask: React.FC = () => {
           onChange={handleChange}
           required
         />
+        <Label htmlFor="taskid">Task ID</Label>
         <Input
           type="text"
           name="taskid"
@@ -145,6 +164,7 @@ const AddTask: React.FC = () => {
           onChange={handleChange}
           required
         />
+        <Label htmlFor="description">Description</Label>
         <Input
           type="text"
           name="description"
@@ -153,6 +173,7 @@ const AddTask: React.FC = () => {
           onChange={handleChange}
           required
         />
+        <Label htmlFor="duedate">Due Date</Label>
         <Input
           type="date"
           name="duedate"
@@ -160,6 +181,7 @@ const AddTask: React.FC = () => {
           onChange={handleChange}
           required
         />
+        <Label htmlFor="priority">Priority</Label>
         <Input
           type="text"
           name="priority"
@@ -171,6 +193,7 @@ const AddTask: React.FC = () => {
         <Button type="submit">Add Task</Button>
       </FormWrapper>
       {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
+      {errorMessage && <AlertMessage>{errorMessage}</AlertMessage>}
     </Container>
   );
 };

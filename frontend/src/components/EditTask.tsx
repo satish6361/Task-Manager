@@ -5,58 +5,81 @@ import styled from 'styled-components';
 
 const Container = styled.div`
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  height: 100vh;
-  background-color: #f0f0f0;
+  justify-content: center;
+  padding: 40px;
+  background-color: #e0f2f1; /* Bluish tone background */
+  min-height: 100vh;
 `;
 
 const FormWrapper = styled.form`
-  background: linear-gradient(145deg, #f6c3d9, #fda1c9);
-  border-radius: 8px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 30px;
-  width: 80%;
+  width: 100%;
   max-width: 400px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  align-items: flex-start; /* Align labels to the left */
 `;
 
 const Title = styled.h2`
   margin-bottom: 20px;
   text-align: center;
   color: #333;
+  font-family: 'Arial', sans-serif;
 `;
 
 const Input = styled.input`
-  width: 100%;
+  width: 93%;
   padding: 12px;
-  margin-bottom: 20px;
-  border: none;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
   border-radius: 5px;
-  font-size: 16px;
-  background-color: #fff;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+  }
 `;
 
 const Button = styled.button`
   width: 100%;
   padding: 12px;
-  background: linear-gradient(145deg, #ff4081, #ff7979);
+  background: linear-gradient(145deg, #00acc1, #00838f); /* Bluish tone gradient */
   color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 16px;
-  transition: background 0.3s ease;
+  font-size: 1rem;
+  transition: background 0.3s ease, transform 0.3s ease;
 
   &:hover {
-    background: linear-gradient(145deg, #ff4081, #ff6b6b);
+    background: linear-gradient(145deg, #0097a7, #006064); /* Darker shade on hover */
+    transform: translateY(-2px);
   }
 `;
 
-const EditTask = () => {
+const SuccessMessage = styled.div`
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: 5px;
+`;
+
+const Label = styled.label`
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  align-self: flex-start; /* Align labels to the left */
+`;
+
+const EditTask: React.FC = () => {
   const { taskid } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -66,6 +89,8 @@ const EditTask = () => {
     priority: '',
     taskid: '',
   });
+
+  const [successMessage, setSuccessMessage] = useState('');
 
   const fetchTask = async (taskid) => {
     try {
@@ -83,7 +108,7 @@ const EditTask = () => {
         taskid: taskid,
       };
 
-      const response = await axios.post('http://localhost:4000/getTaskById', payload);
+      const response = await axios.post('https://satish-task-manager.onrender.com/getTaskById', payload);
 
       let taskData = response.data.task;
 
@@ -132,11 +157,13 @@ const EditTask = () => {
         taskid: taskid,
       };
 
-      const response = await axios.post('http://localhost:4000/updateTask', payload);
+      const response = await axios.post('https://satish-task-manager.onrender.com/updateTask', payload);
 
       if (response.status === 200) {
-        alert('Task Updated Successfully');
-        navigate('/');
+        setSuccessMessage('Task Updated Successfully');
+        setTimeout(() => {
+          navigate('/');
+        }, 2000); // Wait for 2 seconds before navigating to home
       }
     } catch (error) {
       console.log('Error Updating Task ', error);
@@ -155,6 +182,7 @@ const EditTask = () => {
     <Container>
       <FormWrapper onSubmit={handleSubmit}>
         <Title>Update Task</Title>
+        <Label htmlFor="title">Title</Label>
         <Input
           type="text"
           name="title"
@@ -163,6 +191,7 @@ const EditTask = () => {
           onChange={handleChange}
           required
         />
+        <Label htmlFor="description">Description</Label>
         <Input
           type="text"
           name="description"
@@ -171,6 +200,7 @@ const EditTask = () => {
           onChange={handleChange}
           required
         />
+        <Label htmlFor="deadline">Deadline</Label>
         <Input
           type="date"
           name="deadline"
@@ -179,6 +209,7 @@ const EditTask = () => {
           onChange={handleChange}
           required
         />
+        <Label htmlFor="priority">Priority</Label>
         <Input
           type="text"
           name="priority"
@@ -187,6 +218,7 @@ const EditTask = () => {
           onChange={handleChange}
           required
         />
+        <Label htmlFor="taskid">Task ID</Label>
         <Input
           type="text"
           name="taskid"
@@ -197,6 +229,7 @@ const EditTask = () => {
         />
         <Button type="submit">Update Task</Button>
       </FormWrapper>
+      {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
     </Container>
   );
 };
